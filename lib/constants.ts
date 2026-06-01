@@ -45,6 +45,12 @@ export const NAV_LINKS = [
 
 export { INDUSTRIES } from "./industries-data";
 
+export const HERO_STATS = [
+  { value: 1000, suffix: "+", label: "مشتری صنعتی" },
+  { value: 100, suffix: "+", label: "تأمین‌کننده جهانی" },
+  { value: 30, suffix: "+", label: "سال تجربه" },
+] as const;
+
 export const STATS = [
   { value: 30, suffix: "+", label: "سال تجربه" },
   { value: 1000, suffix: "+", label: "پروژه موفق" },

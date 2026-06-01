@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Phone } from "lucide-react";
 import { SITE } from "@/lib/constants";
 import { Button } from "@/components/ui/Button";
+import { HeroStatsBar } from "@/components/home/HeroStatsBar";
 
 export function HeroSection() {
   return (
@@ -30,7 +31,7 @@ export function HeroSection() {
         aria-hidden
       />
 
-      <div className="section-container relative grid min-h-[92vh] items-center py-28 lg:min-h-screen lg:grid-cols-2 lg:py-32">
+      <div className="section-container relative grid min-h-[92vh] items-center pb-36 py-28 sm:pb-40 lg:min-h-screen lg:grid-cols-2 lg:pb-44 lg:py-32">
         {/* RTL: first column = right half — text block */}
         <motion.div
           initial={{ opacity: 0, y: 28 }}
@@ -85,6 +86,8 @@ export function HeroSection() {
         {/* Left half — keeps image visible */}
         <div className="hidden lg:block" aria-hidden />
       </div>
+
+      <HeroStatsBar />
     </section>
   );
 }
