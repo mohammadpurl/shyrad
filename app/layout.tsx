@@ -5,6 +5,7 @@ import { Footer } from "@/components/layout/Footer";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { SiteSchemas } from "@/components/seo/JsonLd";
 import { createMetadata } from "@/lib/metadata";
+import { SITE } from "@/lib/constants";
 import "./globals.css";
 
 const vazirmatn = Vazirmatn({
@@ -13,10 +14,21 @@ const vazirmatn = Vazirmatn({
   display: "swap",
 });
 
-export const metadata: Metadata = createMetadata({
-  title: "خانه",
-  path: "/",
-});
+export const metadata: Metadata = {
+  ...createMetadata({
+    title: SITE.name,
+    path: "/",
+  }),
+  title: {
+    default: SITE.name,
+    template: `%s | ${SITE.name}`,
+  },
+  icons: {
+    icon: SITE.favicon,
+    shortcut: SITE.favicon,
+    apple: SITE.favicon,
+  },
+};
 
 export default function RootLayout({
   children,

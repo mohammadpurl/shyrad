@@ -2,36 +2,52 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Globe, LayoutGrid, PhoneCall } from "lucide-react";
+import {
+  Home,
+  Globe,
+  LayoutGrid,
+  PhoneCall,
+  Package,
+  BookOpen,
+  Info,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
+import { NAV_LINKS } from "@/lib/constants";
 
 const WHATSAPP_URL = "https://wa.me/989121234567";
 
-const navLinks = [
-  { href: "/contact", label: "تماس با ما", icon: PhoneCall, match: "/contact" },
-  { href: "/global-supply", label: "تأمین جهانی", icon: Globe, match: "/global-supply" },
-  { href: "/industries", label: "صنایع", icon: LayoutGrid, match: "/industries" },
-  { href: "/", label: "خانه", icon: Home, match: "/" },
-] as const;
+const navIcons: Record<string, typeof Home> = {
+  "/": Home,
+  "/about": Info,
+  "/products": Package,
+  "/industries": LayoutGrid,
+  "/global-supply": Globe,
+  "/blog": BookOpen,
+  "/contact": PhoneCall,
+};
 
-function isActive(pathname: string, match: string) {
-  if (match === "/") return pathname === "/";
-  return pathname.startsWith(match);
+function isActive(pathname: string, href: string) {
+  if (href === "/") return pathname === "/";
+  return pathname.startsWith(href);
 }
 
 export function MobileBottomNav() {
   const pathname = usePathname();
 
+  const primaryLinks = NAV_LINKS.filter((link) =>
+    ["/", "/industries", "/global-supply", "/contact"].includes(link.href)
+  );
+
   return (
     <nav
       className="fixed inset-x-0 bottom-0 z-50 px-4 pb-4 pt-2 xl:hidden"
-      aria-label="ناوبری موبایل"
+      aria-label="ناوبری سریع موبایل"
     >
-      <div className="mx-auto flex max-w-md items-end justify-between rounded-full border border-white/10 bg-navy/85 px-2 py-2 shadow-[0_8px_32px_rgba(4,27,64,0.45)] backdrop-blur-md">
-        {navLinks.slice(0, 2).map((item) => {
-          const active = isActive(pathname, item.match);
-          const Icon = item.icon;
+      <div className="mx-auto flex max-w-lg items-end justify-between rounded-full border border-white/10 bg-navy/85 px-2 py-2 shadow-[0_8px_32px_rgba(4,27,64,0.45)] backdrop-blur-md">
+        {primaryLinks.slice(0, 2).map((item) => {
+          const active = isActive(pathname, item.href);
+          const Icon = navIcons[item.href] ?? Home;
 
           return (
             <Link
@@ -80,9 +96,9 @@ export function MobileBottomNav() {
           <span className="text-[10px] font-medium text-white/90">واتساپ</span>
         </a>
 
-        {navLinks.slice(2).map((item) => {
-          const active = isActive(pathname, item.match);
-          const Icon = item.icon;
+        {primaryLinks.slice(2).map((item) => {
+          const active = isActive(pathname, item.href);
+          const Icon = navIcons[item.href] ?? Home;
 
           return (
             <Link

@@ -7,7 +7,7 @@ export function organizationSchema() {
     name: SITE.name,
     alternateName: SITE.nameEn,
     url: SITE.url,
-    logo: `${SITE.url}/images/landingpage.png`,
+    logo: `${SITE.url}${SITE.logo}`,
     description: SITE.description,
     email: SITE.email,
     telephone: SITE.phone,
@@ -87,7 +87,7 @@ export function articleSchema(article: {
       name: SITE.name,
       logo: {
         "@type": "ImageObject",
-        url: `${SITE.url}/images/landingpage.png`,
+        url: `${SITE.url}${SITE.logo}`,
       },
     },
     mainEntityOfPage: {

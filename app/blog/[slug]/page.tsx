@@ -52,7 +52,7 @@ export default async function BlogPostPage({ params }: Props) {
         ]}
       />
 
-      <article className="pt-24 pb-20 lg:pt-28">
+      <article className="pt-32 pb-20 xl:pt-28">
         <div className="section-container max-w-3xl">
           <nav aria-label="مسیر صفحه" className="mb-6">
             <Link

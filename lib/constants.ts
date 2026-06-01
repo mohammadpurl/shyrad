@@ -10,6 +10,8 @@ export const SITE = {
   email: "info@shyrad.com",
   address: "تهران، خیابان آفریقا، خیابان یزدان‌پناه، پلاک ۷۶",
   locale: "fa_IR",
+  logo: "/images/Logo.png",
+  favicon: "/favicon.ico",
 } as const;
 
 export const OFFICES = [
@@ -89,24 +91,24 @@ export const SUPPLY_COUNTRIES = [
 
 export const WHY_CHOOSE_US = [
   {
-    title: "شبکه تأمین جهانی",
-    description: "دسترسی به معتبرترین تأمین‌کنندگان اروپا و آسیا",
-    icon: "globe" as const,
+    title: "تأمین از معتبرترین منابع جهانی",
+    description: "همکاری مستقیم با تولیدکنندگان برتر دنیا",
+    icon: "ship" as const,
   },
   {
     title: "کنترل کیفیت سخت‌گیرانه",
-    description: "بازرسی فنی در مبدأ و مقصد",
+    description: "ارائه مواد اولیه با بالاترین استانداردهای کیفی",
     icon: "badge-check" as const,
   },
   {
-    title: "تحویل مطمئن",
-    description: "زمان‌بندی دقیق و لجستیک یکپارچه",
-    icon: "truck" as const,
+    title: "تحویل مطمئن و به‌موقع",
+    description: "تعهد در زمان‌بندی و پشتیبانی کامل",
+    icon: "clock" as const,
   },
   {
-    title: "مشاوره فنی تخصصی",
-    description: "تیم مهندسی با تجربه صنایع مختلف",
-    icon: "users" as const,
+    title: "مشاوره تخصصی",
+    description: "ارائه راهکارهای بهینه توسط متخصصین مجرب",
+    icon: "headphones" as const,
   },
 ] as const;
 

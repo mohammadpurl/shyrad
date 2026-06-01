@@ -13,7 +13,7 @@ export function Logo({ variant = "dark", className }: LogoProps) {
   return (
     <div className={cn("flex items-center gap-3", className)}>
       <Image
-        src="/images/Logo.png"
+        src={SITE.logo}
         alt={SITE.name}
         width={48}
         height={48}

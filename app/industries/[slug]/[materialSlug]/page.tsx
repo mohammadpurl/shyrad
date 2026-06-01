@@ -64,7 +64,7 @@ export default async function MaterialPage({ params }: Props) {
         ])}
       />
 
-      <article className="pt-24 pb-20 lg:pt-28">
+      <article className="pt-32 pb-20 xl:pt-28">
         <div className="section-container">
           <nav className="mb-8 flex flex-wrap items-center gap-2 text-sm text-muted">
             <Link href="/industries" className="hover:text-gold">

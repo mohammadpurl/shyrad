@@ -4,9 +4,8 @@ import { breadcrumbSchema } from "@/lib/schema";
 import { SITE, SUPPLY_COUNTRIES } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { PageHero } from "@/components/ui/PageHero";
-import { GlobalSupplySection } from "@/components/home/GlobalSupplySection";
+import { GlobalWhySection } from "@/components/home/GlobalWhySection";
 import { ProcessSection } from "@/components/home/ProcessSection";
-import { WhyChooseUsSection } from "@/components/home/WhyChooseUsSection";
 import { CTASection } from "@/components/home/CTASection";
 import { MotionWrapper } from "@/components/ui/MotionWrapper";
 
@@ -58,9 +57,8 @@ export default function GlobalSupplyPage() {
         </div>
       </section>
 
-      <GlobalSupplySection />
+      <GlobalWhySection />
       <ProcessSection />
-      <WhyChooseUsSection />
       <CTASection />
     </>
   );

@@ -19,7 +19,7 @@ export function PageHero({
 }: PageHeroProps) {
   return (
     <section
-      className="relative flex min-h-[42vh] items-center overflow-hidden pt-20 lg:min-h-[48vh]"
+      className="relative flex min-h-[42vh] items-center overflow-hidden pt-32 xl:pt-20 lg:min-h-[48vh]"
       aria-labelledby="page-hero-heading"
     >
       <Image

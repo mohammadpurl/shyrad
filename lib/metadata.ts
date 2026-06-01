@@ -15,13 +15,11 @@ export function createMetadata({
   noIndex = false,
 }: PageMeta): Metadata {
   const url = `${SITE.url}${path}`;
-  const fullTitle =
-    path === "" || path === "/"
-      ? `${SITE.name} | ${SITE.tagline}`
-      : `${title} | ${SITE.name}`;
+  const isHome = path === "" || path === "/";
+  const fullTitle = isHome ? SITE.name : `${title} | ${SITE.name}`;
 
   return {
-    title: fullTitle,
+    ...(isHome ? { title: { absolute: SITE.name } } : { title }),
     description,
     metadataBase: new URL(SITE.url),
     alternates: {
