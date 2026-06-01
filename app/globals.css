@@ -1,26 +1,94 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --navy: #082b63;
+  --navy-dark: #041b40;
+  --gold: #d8a43a;
+  --gold-light: #e8c061;
+  --background: #f8fafc;
+  --white: #ffffff;
+  --text-dark: #1a1a1a;
+  --gray: #6b7280;
 }
 
 @theme inline {
+  --color-navy: var(--navy);
+  --color-navy-dark: var(--navy-dark);
+  --color-gold: var(--gold);
+  --color-gold-light: var(--gold-light);
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-text-dark: var(--text-dark);
+  --color-muted: var(--gray);
+  --font-sans: var(--font-vazirmatn);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--text-dark);
+  font-family: var(--font-vazirmatn), system-ui, sans-serif;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--gold) 35%, transparent);
+  color: var(--navy-dark);
+}
+
+.section-container {
+  @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+}
+
+.gradient-navy {
+  background: linear-gradient(
+    135deg,
+    rgba(4, 27, 64, 0.95) 0%,
+    rgba(8, 43, 99, 0.85) 50%,
+    rgba(8, 43, 99, 0.6) 100%
+  );
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.card-shadow {
+  box-shadow:
+    0 4px 6px -1px rgba(8, 43, 99, 0.06),
+    0 10px 30px -5px rgba(8, 43, 99, 0.1);
+}
+
+.card-shadow-lg {
+  box-shadow:
+    0 10px 40px -10px rgba(4, 27, 64, 0.2),
+    0 4px 12px -2px rgba(8, 43, 99, 0.08);
+}
+
+/* Hide scrollbar for industry slider */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes pulse-gold {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(216, 164, 58, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(216, 164, 58, 0);
+  }
+}
+
+.animate-pulse-gold {
+  animation: pulse-gold 2s ease-in-out infinite;
 }
