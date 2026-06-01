@@ -257,6 +257,22 @@ export function isMaterialInIndustry(
   return industry?.materialSlugs.includes(materialSlug) ?? false;
 }
 
+export function getMaterialPageHref(materialSlug: string): string | undefined {
+  for (const industry of INDUSTRIES_DATA) {
+    if (industry.materialSlugs.includes(materialSlug)) {
+      return `/industries/${industry.slug}/${materialSlug}`;
+    }
+  }
+  return undefined;
+}
+
+export function getMarqueeMaterials(): { title: string; href: string }[] {
+  return Object.values(MATERIALS).map((material) => ({
+    title: material.title,
+    href: getMaterialPageHref(material.slug) ?? `/industries`,
+  }));
+}
+
 // Re-export for backward compatibility with constants
 export const INDUSTRIES = INDUSTRIES_DATA.map(
   ({ materialSlugs: _, ...rest }) => rest

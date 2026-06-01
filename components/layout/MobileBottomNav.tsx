@@ -4,135 +4,107 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Home,
-  Globe,
   LayoutGrid,
   PhoneCall,
   Package,
-  BookOpen,
-  Info,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
-import { NAV_LINKS } from "@/lib/constants";
 
 const WHATSAPP_URL = "https://wa.me/989121234567";
 
-const navIcons: Record<string, typeof Home> = {
-  "/": Home,
-  "/about": Info,
-  "/products": Package,
-  "/industries": LayoutGrid,
-  "/global-supply": Globe,
-  "/blog": BookOpen,
-  "/contact": PhoneCall,
-};
+const MOBILE_NAV = [
+  { href: "/", label: "خانه", icon: Home },
+  { href: "/products", label: "محصولات", icon: Package },
+  { href: "/industries", label: "صنایع", icon: LayoutGrid },
+  { href: "/contact", label: "تماس", icon: PhoneCall },
+] as const;
 
 function isActive(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
   return pathname.startsWith(href);
 }
 
+function NavItem({
+  href,
+  label,
+  icon: Icon,
+  pathname,
+}: {
+  href: string;
+  label: string;
+  icon: typeof Home;
+  pathname: string;
+}) {
+  const active = isActive(pathname, href);
+
+  return (
+    <Link
+      href={href}
+      className="flex flex-col items-center gap-0.5 py-1"
+      aria-current={active ? "page" : undefined}
+    >
+      <span
+        className={cn(
+          "flex size-8 items-center justify-center rounded-full transition-all sm:size-9",
+          active && "bg-white/15 shadow-[0_0_16px_rgba(255,255,255,0.35)]"
+        )}
+      >
+        <Icon
+          className={cn(
+            "size-[18px] sm:size-5",
+            active ? "text-white" : "text-white/70"
+          )}
+          strokeWidth={active ? 2.5 : 1.75}
+          aria-hidden
+        />
+      </span>
+      <span
+        className={cn(
+          "text-[9px] font-medium leading-tight sm:text-[10px]",
+          active ? "text-white" : "text-white/70"
+        )}
+      >
+        {label}
+      </span>
+    </Link>
+  );
+}
+
 export function MobileBottomNav() {
   const pathname = usePathname();
-
-  const primaryLinks = NAV_LINKS.filter((link) =>
-    ["/", "/industries", "/global-supply", "/contact"].includes(link.href)
-  );
+  const [leftA, leftB, rightA, rightB] = MOBILE_NAV;
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-50 px-4 pb-4 pt-2 xl:hidden"
+      className="fixed inset-x-0 bottom-0 z-50 px-3 pb-3 pt-2 sm:px-4 sm:pb-4 xl:hidden"
       aria-label="ناوبری سریع موبایل"
     >
-      <div className="mx-auto flex max-w-lg items-end justify-between rounded-full border border-white/10 bg-navy/85 px-2 py-2 shadow-[0_8px_32px_rgba(4,27,64,0.45)] backdrop-blur-md">
-        {primaryLinks.slice(0, 2).map((item) => {
-          const active = isActive(pathname, item.href);
-          const Icon = navIcons[item.href] ?? Home;
+      <div className="relative mx-auto max-w-lg rounded-full border border-white/10 bg-navy/90 px-2 py-2 shadow-[0_8px_32px_rgba(4,27,64,0.45)] backdrop-blur-md sm:px-3">
+        <div className="grid grid-cols-5 items-end">
+          <NavItem {...leftA} pathname={pathname} />
+          <NavItem {...leftB} pathname={pathname} />
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="flex min-w-0 flex-1 flex-col items-center gap-1 px-1 py-1"
-              aria-current={active ? "page" : undefined}
+          <div className="flex justify-center">
+            <a
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group -mt-7 flex flex-col items-center gap-0.5 sm:-mt-8"
+              aria-label="واتساپ"
             >
-              <span
-                className={cn(
-                  "relative flex size-9 items-center justify-center rounded-full transition-all",
-                  active && "bg-white/15 shadow-[0_0_16px_rgba(255,255,255,0.35)]"
-                )}
-              >
-                <Icon
-                  className={cn(
-                    "size-5 transition-colors",
-                    active ? "text-white" : "text-white/70"
-                  )}
-                  strokeWidth={active ? 2.5 : 1.75}
-                  aria-hidden
-                />
+              <span className="animate-pulse-gold flex size-12 items-center justify-center rounded-full bg-gold text-navy-dark shadow-[0_0_20px_rgba(216,164,58,0.55)] transition-transform group-active:scale-95 sm:size-14">
+                <WhatsAppIcon className="size-6 sm:size-7" />
               </span>
-              <span
-                className={cn(
-                  "truncate text-[10px] font-medium leading-tight",
-                  active ? "text-white" : "text-white/70"
-                )}
-              >
-                {item.label}
+              <span className="text-[9px] font-medium text-white/90 sm:text-[10px]">
+                واتساپ
               </span>
-            </Link>
-          );
-        })}
+            </a>
+          </div>
 
-        <a
-          href={WHATSAPP_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group -mt-7 flex flex-col items-center gap-1"
-          aria-label="واتساپ"
-        >
-          <span className="animate-pulse-gold flex size-14 items-center justify-center rounded-full bg-gold text-navy-dark shadow-[0_0_20px_rgba(216,164,58,0.55)] transition-transform group-active:scale-95">
-            <WhatsAppIcon className="size-7" />
-          </span>
-          <span className="text-[10px] font-medium text-white/90">واتساپ</span>
-        </a>
-
-        {primaryLinks.slice(2).map((item) => {
-          const active = isActive(pathname, item.href);
-          const Icon = navIcons[item.href] ?? Home;
-
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="flex min-w-0 flex-1 flex-col items-center gap-1 px-1 py-1"
-              aria-current={active ? "page" : undefined}
-            >
-              <span
-                className={cn(
-                  "relative flex size-9 items-center justify-center rounded-full transition-all",
-                  active && "bg-white/15 shadow-[0_0_16px_rgba(255,255,255,0.35)]"
-                )}
-              >
-                <Icon
-                  className={cn(
-                    "size-5 transition-colors",
-                    active ? "text-white" : "text-white/70"
-                  )}
-                  strokeWidth={active ? 2.5 : 1.75}
-                  aria-hidden
-                />
-              </span>
-              <span
-                className={cn(
-                  "truncate text-[10px] font-medium leading-tight",
-                  active ? "text-white" : "text-white/70"
-                )}
-              >
-                {item.label}
-              </span>
-            </Link>
-          );
-        })}
+          <NavItem {...rightA} pathname={pathname} />
+          <NavItem {...rightB} pathname={pathname} />
+        </div>
       </div>
     </nav>
   );

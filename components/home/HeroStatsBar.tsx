@@ -38,15 +38,20 @@ function HeroStatItem({
   }, [isInView, value]);
 
   return (
-    <div ref={ref} className="flex flex-col items-center px-4 py-5 text-center sm:px-6 sm:py-6">
+    <div
+      ref={ref}
+      className="flex min-w-0 flex-1 flex-col items-center rounded-2xl border border-white/70 bg-white/90 px-3 py-4 text-center shadow-[0_4px_24px_rgba(4,27,64,0.15)] backdrop-blur-xl sm:rounded-3xl sm:px-5 sm:py-5 lg:px-6 lg:py-6"
+    >
       <p
-        className="text-2xl font-bold text-navy sm:text-3xl lg:text-4xl"
+        className="text-xl font-bold text-navy sm:text-2xl lg:text-3xl"
         aria-live="polite"
       >
         {count.toLocaleString("fa-IR")}
         {suffix}
       </p>
-      <p className="mt-1 text-xs font-medium text-navy/75 sm:text-sm">{label}</p>
+      <p className="mt-1.5 text-[11px] font-semibold leading-snug text-navy/85 sm:text-xs lg:text-sm">
+        {label}
+      </p>
     </div>
   );
 }
@@ -61,8 +66,13 @@ export function HeroStatsBar() {
       aria-label="آمار و دستاوردها"
     >
       <div className="section-container">
-        <div className="mx-auto max-w-3xl overflow-hidden rounded-2xl border border-white/40 bg-white/20 shadow-[0_8px_32px_rgba(4,27,64,0.12)] backdrop-blur-md sm:rounded-3xl">
-          <div className="grid grid-cols-3 divide-x divide-white/30">
+        <div className="relative mx-auto max-w-4xl">
+          <div
+            className="pointer-events-none absolute -inset-x-4 -bottom-4 -top-8 rounded-3xl bg-gradient-to-t from-navy-dark/50 via-navy-dark/20 to-transparent sm:-inset-x-8"
+            aria-hidden
+          />
+
+          <div className="relative flex gap-3 sm:gap-5 lg:gap-6">
             {HERO_STATS.map((stat) => (
               <HeroStatItem
                 key={stat.label}

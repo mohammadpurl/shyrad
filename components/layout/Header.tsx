@@ -122,32 +122,6 @@ export function Header() {
             </Button>
           </div>
         </div>
-
-        {/* Mobile & tablet nav — same links as desktop */}
-        <nav
-          className={cn(
-            "no-scrollbar -mx-4 flex gap-0.5 overflow-x-auto px-4 pb-3 xl:hidden",
-            solidHeader && "border-t border-navy/5 pt-2"
-          )}
-          aria-label="منوی موبایل"
-        >
-          {NAV_LINKS.map((link) => {
-            const active =
-              link.href === "/"
-                ? pathname === "/"
-                : pathname.startsWith(link.href);
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(linkClass(active), "text-xs sm:text-sm")}
-                aria-current={active ? "page" : undefined}
-              >
-                {link.label}
-              </Link>
-            );
-          })}
-        </nav>
       </div>
     </header>
   );
