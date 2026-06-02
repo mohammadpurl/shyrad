@@ -118,45 +118,6 @@ export const WHY_CHOOSE_US = [
   },
 ] as const;
 
-export const PRODUCTS = [
-  {
-    slug: "silica-sand",
-    title: "ماسه سیلیس",
-    category: "شیشه",
-    description: "ماسه سیلیس با خلوص بالا برای صنایع شیشه و سرامیک.",
-  },
-  {
-    slug: "soda-ash",
-    title: "سودا اش",
-    category: "شیشه",
-    description: "سودا اش صنعتی برای خطوط تولید شیشه مسطح و ظرف.",
-  },
-  {
-    slug: "feldspar",
-    title: "فلدسپار",
-    category: "سرامیک",
-    description: "فلدسپار سدیم و پتاسیم برای بدنه سرامیک و لعاب.",
-  },
-  {
-    slug: "kaolin",
-    title: "کائولن",
-    category: "سرامیک",
-    description: "کائولن با کیفیت صادراتی برای کاشی و چینی بهداشتی.",
-  },
-  {
-    slug: "refractory-clay",
-    title: "خاک نسوز",
-    category: "نسوز",
-    description: "خاک‌های نسوز و مواد چسباننده برای آجر نسوز.",
-  },
-  {
-    slug: "zircon",
-    title: "زركون",
-    category: "لعاب",
-    description: "پودر زircon برای افزایش مقاومت حرارتی لعاب.",
-  },
-] as const;
-
 export const SOCIAL_LINKS = [
   { href: "https://linkedin.com", label: "LinkedIn", icon: "linkedin" as const },
   { href: "https://instagram.com", label: "Instagram", icon: "instagram" as const },

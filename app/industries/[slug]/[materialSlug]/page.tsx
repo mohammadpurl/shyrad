@@ -99,11 +99,67 @@ export default async function MaterialPage({ params }: Props) {
               <h1 className="mt-3 text-3xl font-bold text-navy sm:text-4xl">
                 {material.title}
               </h1>
+              {material.titleEn && (
+                <p className="mt-2 text-sm font-medium tracking-wide text-muted uppercase">
+                  {material.titleEn}
+                </p>
+              )}
+              {material.subtitle && (
+                <p className="mt-2 text-sm font-medium text-navy/80">
+                  {material.subtitle}
+                </p>
+              )}
               <p className="mt-6 text-base leading-relaxed text-muted lg:text-lg">
                 {material.description}
               </p>
 
-              {material.specs && material.specs.length > 0 && (
+              {material.sections?.map((section) => (
+                <div key={section.heading} className="mt-8">
+                  <h2 className="mb-3 text-base font-bold text-navy sm:text-lg">
+                    {section.heading}
+                  </h2>
+                  {section.paragraphs?.map((paragraph) => (
+                    <p
+                      key={paragraph}
+                      className="mb-3 text-sm leading-relaxed text-muted lg:text-base"
+                    >
+                      {paragraph}
+                    </p>
+                  ))}
+                  {section.items && section.items.length > 0 && (
+                    <ul className="space-y-2">
+                      {section.items.map((item) => (
+                        <li
+                          key={item}
+                          className="flex items-start gap-2 text-sm text-muted lg:text-base"
+                        >
+                          <CheckCircle2
+                            className="mt-0.5 size-4 shrink-0 text-gold"
+                            aria-hidden
+                          />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {section.subsections && section.subsections.length > 0 && (
+                    <div className="space-y-4">
+                      {section.subsections.map((subsection) => (
+                        <div key={subsection.title}>
+                          <h3 className="text-sm font-bold text-navy lg:text-base">
+                            {subsection.title}
+                          </h3>
+                          <p className="mt-1 text-sm leading-relaxed text-muted lg:text-base">
+                            {subsection.description}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {!material.sections && material.specs && material.specs.length > 0 && (
                 <div className="mt-8">
                   <h2 className="mb-4 text-sm font-bold text-navy">
                     مشخصات و مزایا

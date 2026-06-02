@@ -56,21 +56,27 @@ function HeroStatItem({
   );
 }
 
-export function HeroStatsBar() {
+export function HeroStatsBar({ inline = false }: { inline?: boolean }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
-      className="absolute inset-x-0 bottom-6 z-20 sm:bottom-8 lg:bottom-12"
+      className={
+        inline
+          ? "relative z-20 mt-10"
+          : "absolute inset-x-0 bottom-6 z-20 sm:bottom-8 lg:bottom-12"
+      }
       aria-label="آمار و دستاوردها"
     >
-      <div className="section-container">
+      <div className={inline ? undefined : "section-container"}>
         <div className="relative mx-auto max-w-4xl">
-          <div
-            className="pointer-events-none absolute -inset-x-4 -bottom-4 -top-8 rounded-3xl bg-gradient-to-t from-navy-dark/50 via-navy-dark/20 to-transparent sm:-inset-x-8"
-            aria-hidden
-          />
+          {!inline && (
+            <div
+              className="pointer-events-none absolute -inset-x-4 -bottom-4 -top-8 rounded-3xl bg-gradient-to-t from-navy-dark/50 via-navy-dark/20 to-transparent sm:-inset-x-8"
+              aria-hidden
+            />
+          )}
 
           <div className="relative flex gap-3 sm:gap-5 lg:gap-6">
             {HERO_STATS.map((stat) => (
