@@ -21,20 +21,68 @@ type Props = {
   params: Promise<{ slug: string }>;
 };
 
+const industryMeta: Record<string, { title: string; description: string }> = {
+  "ceramic-tile": {
+    title: "مواد اولیه کاشی و سرامیک",
+    description:
+      "تأمین سیلیکات زیرکونیوم، اکسید کبالت، کائولن AKW و اکسید آلومینا برای صنعت کاشی و سرامیک. واردات مستقیم از آلمان و اسپانیا.",
+  },
+  "sanitary-ware": {
+    title: "مواد اولیه چینی بهداشتی",
+    description:
+      "تأمین هیدروکسید کبالت، کائولن OKA و اکسید آلومینا متال گرید برای صنعت چینی بهداشتی.",
+  },
+  glaze: {
+    title: "مواد اولیه لعاب‌سازی",
+    description:
+      "تأمین اکسید تیتانیوم، فریت‌های صنعتی ایتالیایی و اکسید زیرکونیوم برای صنعت لعاب‌سازی.",
+  },
+  glass: {
+    title: "مواد اولیه صنعت شیشه",
+    description:
+      "تأمین شن کوارتز درجه یک، سودا اش و اکسید قلع برای صنعت شیشه.",
+  },
+  tableware: {
+    title: "مواد اولیه چینی ظروف و بلور",
+    description:
+      "تأمین خاک چینی باریوم، اکسید روی و تبولار آلومینا برای صنعت چینی ظروف.",
+  },
+  battery: {
+    title: "مواد اولیه باطری‌سازی",
+    description:
+      "تأمین شمش قلع، هیدروکسید کبالت و گرافیت صنعتی برای صنعت باطری‌سازی.",
+  },
+};
+
 export async function generateStaticParams() {
   return getAllIndustrySlugs().map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const industry = getIndustryBySlug(slug);
-  if (!industry) return {};
+  const meta = industryMeta[slug];
+  if (!meta) {
+    const industry = getIndustryBySlug(slug);
+    if (!industry) return {};
+    return createMetadata({
+      title: industry.title,
+      description: industry.description,
+      path: `/industries/${slug}`,
+    });
+  }
 
-  return createMetadata({
-    title: industry.title,
-    description: industry.description,
-    path: `/industries/${slug}`,
-  });
+  return {
+    title: meta.title,
+    description: meta.description,
+    alternates: {
+      canonical: `https://sayradtejarat.com/industries/${slug}`,
+    },
+    openGraph: {
+      title: `${meta.title} | شایراد تجارت پارس`,
+      description: meta.description,
+      url: `https://sayradtejarat.com/industries/${slug}`,
+    },
+  };
 }
 
 export default async function IndustryPage({ params }: Props) {
