@@ -1,8 +1,6 @@
 'use client'
 import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import Link from "next/link";
-import { X } from "lucide-react";
 import {
   HERO_INDUSTRIES,
   HERO_UNIQUE_MATERIAL_COUNT,
@@ -11,7 +9,7 @@ import {
 import { INDUSTRY_LUCIDE_ICONS } from "@/lib/industry-icons";
 
 /** 'inline' = کادر کناری | 'modal' = پنجره modal */
-const INDUSTRY_DETAILS_MODE: "inline" | "modal" = "modal";
+const INDUSTRY_DETAILS_MODE: "inline" | "modal" = "inline";
 
 function IndustryDetailsContent({ industry }: { industry: HeroIndustry }) {
   const Icon = INDUSTRY_LUCIDE_ICONS[industry.icon];
@@ -24,9 +22,12 @@ function IndustryDetailsContent({ industry }: { industry: HeroIndustry }) {
         </div>
         <Icon className="h-5 w-5 shrink-0 text-[#e6c068]" />
       </div>
-          <div className="text-xl font-bold text-white lg:text-2xl" id="industry-modal-title">
-            {industry.product}
-          </div>
+      <div
+        className="text-xl font-bold text-white lg:text-2xl"
+        id="industry-details-title"
+      >
+        {industry.product}
+      </div>
       <p className="text-sm leading-relaxed text-[#9fb3d1]">{industry.description}</p>
       <div className="flex max-h-36 flex-wrap gap-2 overflow-y-auto md:max-h-40">
         {industry.materials.map((material) => (
@@ -55,7 +56,8 @@ function IndustryDetailsInlineCard({
       <div className="flex min-h-40 flex-col justify-center gap-2 text-center">
         <div className="text-sm text-[#9fb3d1]">روی یک صنعت کلیک کنید</div>
         <div className="text-xs text-[#6b7fa3]">
-          تا مواد اولیهٔ متناسب با آن نمایش داده شود
+          در دسکتاپ با حرکت ماوس پیش‌نمایش ببینید؛ مواد اولیهٔ متناسب نمایش
+          داده می‌شود
         </div>
       </div>
     );
@@ -64,94 +66,41 @@ function IndustryDetailsInlineCard({
   return (
     <div className="flex flex-col gap-3">
       <IndustryDetailsContent industry={industry} />
-    </div>
-  );
-}
-
-function IndustryDetailsModal({
-  industry,
-  onClose,
-}: {
-  industry: HeroIndustry;
-  onClose: () => void;
-}) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKeyDown);
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = "";
-    };
-  }, [onClose]);
-
-  if (!mounted) return null;
-
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[200] flex items-center justify-center p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="industry-modal-title"
-      onClick={onClose}
-    >
-      <div
-        className="absolute inset-0 bg-[#061230]/25 backdrop-blur-[2px]"
-        aria-hidden
-      />
-      <div
-        key={industry.slug}
-        className="relative w-full max-w-lg animate-[fade-in_300ms_ease-out] rounded-2xl border border-[#d4a84a]/30 bg-[#0c1d44]/92 p-6 shadow-2xl shadow-black/30 backdrop-blur-md"
-        dir="rtl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute end-4 top-4 flex size-9 items-center justify-center rounded-full border border-[#d4a84a]/25 text-[#9fb3d1] transition-colors hover:border-[#e6c068]/50 hover:text-white"
-          aria-label="بستن"
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#d4a84a]/15 pt-4">
+        <Link
+          href={industry.href}
+          className="rounded-xl bg-[#d4a84a] px-4 py-2 text-sm font-bold text-[#061230] transition-opacity hover:opacity-90"
         >
-          <X className="size-4" />
-        </button>
-
-        <div className="flex flex-col gap-4 pe-8">
-          <IndustryDetailsContent industry={industry} />
-        </div>
-
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-[#d4a84a]/15 pt-5">
-          <Link
-            href={industry.href}
-            className="rounded-xl bg-[#d4a84a] px-5 py-2.5 text-sm font-bold text-[#061230] transition-opacity hover:opacity-90"
-          >
-            مشاهده صنعت
-          </Link>
-          <Link
-            href="/contact"
-            className="text-sm text-[#9fb3d1] transition-colors hover:text-[#e6c068]"
-          >
-            استعلام قیمت
-          </Link>
-        </div>
+          مشاهده صنعت
+        </Link>
+        <Link
+          href="/contact"
+          className="text-sm text-[#9fb3d1] transition-colors hover:text-[#e6c068]"
+        >
+          استعلام قیمت
+        </Link>
       </div>
-    </div>,
-    document.body
+    </div>
   );
 }
 
 function ParticleCanvas({ activeId }: { activeId: string | null }) {
   const ref = useRef<HTMLCanvasElement>(null);
-  const stateRef = useRef({ mx: 0, my: 0, t: 0, activeId: activeId as string | null });
+  const stateRef = useRef({
+    mx: 0,
+    my: 0,
+    t: 0,
+    activeId: activeId as string | null,
+    pointerInside: false,
+    restoreBlend: 0,
+  });
 
   useEffect(() => {
+    const prev = stateRef.current.activeId;
     stateRef.current.activeId = activeId;
+    if (prev && !activeId) {
+      stateRef.current.restoreBlend = 1;
+    }
   }, [activeId]);
 
   useEffect(() => {
@@ -172,6 +121,8 @@ function ParticleCanvas({ activeId }: { activeId: string | null }) {
     const particles = Array.from({ length: N }, () => ({
       x: 0,
       y: 0,
+      homeX: 0,
+      homeY: 0,
       vx: (Math.random() - 0.5) * 0.25,
       vy: (Math.random() - 0.5) * 0.25,
       r: Math.random() * 1.6 + 0.4,
@@ -182,6 +133,10 @@ function ParticleCanvas({ activeId }: { activeId: string | null }) {
       for (const p of particles) {
         p.x = Math.random() * width;
         p.y = Math.random() * height;
+        p.homeX = p.x;
+        p.homeY = p.y;
+        p.vx = (Math.random() - 0.5) * 0.25;
+        p.vy = (Math.random() - 0.5) * 0.25;
       }
     };
 
@@ -209,8 +164,12 @@ function ParticleCanvas({ activeId }: { activeId: string | null }) {
       for (const p of particles) {
         p.x *= scaleX;
         p.y *= scaleY;
+        p.homeX *= scaleX;
+        p.homeY *= scaleY;
         p.x = Math.min(Math.max(p.x, 0), w);
         p.y = Math.min(Math.max(p.y, 0), h);
+        p.homeX = Math.min(Math.max(p.homeX, 0), w);
+        p.homeY = Math.min(Math.max(p.homeY, 0), h);
       }
     };
 
@@ -223,12 +182,24 @@ function ParticleCanvas({ activeId }: { activeId: string | null }) {
     window.addEventListener("resize", resize);
 
     const onMove = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
+      const rect = host.getBoundingClientRect();
       if (rect.width <= 0 || rect.height <= 0) return;
+      stateRef.current.pointerInside = true;
       stateRef.current.mx = e.clientX - rect.left;
       stateRef.current.my = e.clientY - rect.top;
     };
-    window.addEventListener("mousemove", onMove);
+
+    const onLeave = () => {
+      stateRef.current.pointerInside = false;
+      stateRef.current.restoreBlend = 1;
+      if (w > 0 && h > 0) {
+        stateRef.current.mx = w / 2;
+        stateRef.current.my = h / 2;
+      }
+    };
+
+    host.addEventListener("mousemove", onMove);
+    host.addEventListener("mouseleave", onLeave);
 
     const render = () => {
       if (w > 0 && h > 0) {
@@ -243,20 +214,40 @@ function ParticleCanvas({ activeId }: { activeId: string | null }) {
         ctx.fillStyle = g;
         ctx.fillRect(0, 0, w, h);
 
-        const { mx, my, activeId: currentActiveId } = stateRef.current;
-        const boost = currentActiveId ? 1 : 0.4;
+        const { mx, my, activeId: currentActiveId, pointerInside } =
+          stateRef.current;
+        const attract =
+          Boolean(currentActiveId) && pointerInside;
+        const springStrength =
+          0.0015 + stateRef.current.restoreBlend * 0.006;
+
+        if (stateRef.current.restoreBlend > 0) {
+          stateRef.current.restoreBlend = Math.max(
+            0,
+            stateRef.current.restoreBlend - 0.018
+          );
+        }
 
         for (const p of particles) {
-          const dx = mx - p.x;
-          const dy = my - p.y;
-          const d2 = dx * dx + dy * dy;
-          if (d2 < 18000) {
-            const f = (1 - d2 / 18000) * 0.04 * boost;
-            p.vx += dx * f * 0.01;
-            p.vy += dy * f * 0.01;
+          if (attract) {
+            const dx = mx - p.x;
+            const dy = my - p.y;
+            const d2 = dx * dx + dy * dy;
+            if (d2 < 18000) {
+              const f = (1 - d2 / 18000) * 0.035;
+              p.vx += dx * f * 0.01;
+              p.vy += dy * f * 0.01;
+            }
+          } else {
+            const dx = p.homeX - p.x;
+            const dy = p.homeY - p.y;
+            p.vx += dx * springStrength;
+            p.vy += dy * springStrength;
           }
-          p.vx *= 0.985;
-          p.vy *= 0.985;
+
+          const damping = attract ? 0.985 : 0.96;
+          p.vx *= damping;
+          p.vy *= damping;
           p.x += p.vx;
           p.y += p.vy;
           if (p.x < 0) p.x += w;
@@ -298,7 +289,8 @@ function ParticleCanvas({ activeId }: { activeId: string | null }) {
       cancelAnimationFrame(raf);
       resizeObserver.disconnect();
       window.removeEventListener("resize", resize);
-      window.removeEventListener("mousemove", onMove);
+      host.removeEventListener("mousemove", onMove);
+      host.removeEventListener("mouseleave", onLeave);
     };
   }, []);
 
@@ -316,11 +308,6 @@ export default function IndustriesHero() {
     HERO_INDUSTRIES.find((i) => i.slug === displayedId) ?? null;
   const selected =
     HERO_INDUSTRIES.find((i) => i.slug === selectedId) ?? null;
-  const showModal =
-    INDUSTRY_DETAILS_MODE === "modal" && Boolean(selectedId);
-  const modalIndustry = selected;
-
-  const closeModal = () => setSelectedId(null);
 
   useEffect(() => {
     const mq = window.matchMedia("(hover: none), (pointer: coarse)");
@@ -398,40 +385,25 @@ export default function IndustriesHero() {
             سرامیک، نسوز، بهداشتی و ریخته‌گری با شبکه تأمین بین‌المللی.
           </p>
 
-          {/* فاصله‌نگهدار layout — جای کادر detail (مخفی) */}
-          {INDUSTRY_DETAILS_MODE === "modal" && (
+          {INDUSTRY_DETAILS_MODE === "inline" && (
+          <div
+            className="relative mt-8 hidden md:mt-10 md:block"
+            aria-live="polite"
+            aria-atomic="true"
+          >
             <div
-              className="mt-8 hidden min-h-52 md:mt-10 md:block md:min-h-56"
-              aria-hidden
-            />
-          )}
-
-          {/* detail panel — غیرفعال (modal فعال است)
-          {INDUSTRY_DETAILS_MODE === "inline" ? (
-            <div className="relative mt-8 hidden md:mt-10 md:block">
-              <div
-                key={displayed?.slug ?? selected?.slug ?? "idle"}
-                className="min-h-52 animate-[fade-in_400ms_ease-out] rounded-2xl border border-[#d4a84a]/25 bg-gradient-to-br from-[#0c1d44]/80 to-[#061230]/80 p-5 backdrop-blur-sm md:min-h-56 lg:p-6"
-              >
-                <IndustryDetailsInlineCard industry={displayed} empty={!displayed} />
-              </div>
+              key={displayed?.slug ?? selected?.slug ?? "idle"}
+              className="min-h-52 animate-[fade-in_400ms_ease-out] rounded-2xl border border-[#d4a84a]/25 bg-gradient-to-br from-[#0c1d44]/80 to-[#061230]/80 p-5 backdrop-blur-sm md:min-h-56 lg:p-6"
+            >
+              <IndustryDetailsInlineCard industry={displayed} empty={!displayed} />
             </div>
-          ) : (
-            <div className="relative mt-8 hidden min-h-40 md:mt-10 md:block">
-              <div className="rounded-2xl border border-[#d4a84a]/15 bg-[#0c1d44]/40 p-5 backdrop-blur-sm">
-                <IndustryDetailsInlineCard industry={null} empty />
-                <p className="mt-2 text-center text-xs text-[#6b7fa3]">
-                  جزئیات در پنجره modal نمایش داده می‌شود
-                </p>
-              </div>
-            </div>
+          </div>
           )}
-          */}
         </div>
 
         {/* orbital industries */}
         <div className="relative mx-auto aspect-square w-full max-w-[min(100%,480px)] shrink-0 rounded-3xl border border-[#d4a84a]/20 bg-[#091a3d]/60 backdrop-blur-sm sm:max-w-[520px] md:mx-0 md:max-w-none md:aspect-auto md:h-[560px] lg:justify-self-end">
-          <ParticleCanvas activeId={selectedId ?? hoveredId} />
+          <ParticleCanvas activeId={hoveredId} />
 
           {/* concentric rings */}
           <div className="pointer-events-none absolute inset-0 grid place-items-center">
@@ -463,10 +435,7 @@ export default function IndustriesHero() {
               const radius = 38;
               const x = 50 + Math.cos(angle) * radius;
               const y = 50 + Math.sin(angle) * radius;
-              const isDisplayed =
-                INDUSTRY_DETAILS_MODE === "modal"
-                  ? selectedId === ind.slug
-                  : displayedId === ind.slug;
+              const isDisplayed = displayedId === ind.slug;
               const isSelected = selectedId === ind.slug;
               const Icon = INDUSTRY_LUCIDE_ICONS[ind.icon];
               return (
@@ -527,13 +496,6 @@ export default function IndustriesHero() {
         )}
       </div>
 
-      {showModal && modalIndustry && (
-        <IndustryDetailsModal
-          industry={modalIndustry}
-          onClose={closeModal}
-        />
-      )}
-
       {/* bottom bar */}
       <div className="relative z-10 mx-auto max-w-7xl border-t border-[#d4a84a]/15 px-5 py-5 md:px-10">
         <div className="flex flex-wrap items-center justify-between gap-3 text-[11px] text-[#6b7fa3] md:text-xs">
@@ -542,9 +504,7 @@ export default function IndustriesHero() {
             اولیه تخصصی
           </span>
           <span className="text-[#9fb3d1]">
-            {INDUSTRY_DETAILS_MODE === "modal"
-              ? "برای جزئیات، روی هر صنعت کلیک کنید"
-              : "برای جزئیات کلیک کنید؛ در دسکتاپ با hover پیش‌نمایش ببینید"}
+            برای جزئیات کلیک کنید؛ در دسکتاپ با hover پیش‌نمایش ببینید
           </span>
         </div>
       </div>
