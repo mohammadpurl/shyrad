@@ -301,6 +301,8 @@ export default function IndustriesHero() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [isTouch, setIsTouch] = useState(false);
+  const orbitAreaRef = useRef<HTMLDivElement>(null);
+  const hoverClearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const displayedId =
     INDUSTRY_DETAILS_MODE === "inline" ? hoveredId ?? selectedId : hoveredId;
@@ -316,6 +318,33 @@ export default function IndustriesHero() {
     mq.addEventListener("change", update);
     return () => mq.removeEventListener("change", update);
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (hoverClearTimerRef.current) clearTimeout(hoverClearTimerRef.current);
+    };
+  }, []);
+
+  const setHoveredIndustry = (slug: string | null) => {
+    if (hoverClearTimerRef.current) {
+      clearTimeout(hoverClearTimerRef.current);
+      hoverClearTimerRef.current = null;
+    }
+    if (slug) {
+      setHoveredId(slug);
+      return;
+    }
+    hoverClearTimerRef.current = setTimeout(() => setHoveredId(null), 100);
+  };
+
+  const handleIndustryPointerLeave = (
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    if (isTouch) return;
+    const related = e.relatedTarget as Node | null;
+    if (related && orbitAreaRef.current?.contains(related)) return;
+    setHoveredIndustry(null);
+  };
 
   const selectIndustry = (slug: string) => {
     setSelectedId((prev) => (prev === slug ? null : slug));
@@ -391,18 +420,24 @@ export default function IndustriesHero() {
             aria-live="polite"
             aria-atomic="true"
           >
-            <div
-              key={displayed?.slug ?? selected?.slug ?? "idle"}
-              className="min-h-52 animate-[fade-in_400ms_ease-out] rounded-2xl border border-[#d4a84a]/25 bg-gradient-to-br from-[#0c1d44]/80 to-[#061230]/80 p-5 backdrop-blur-sm md:min-h-56 lg:p-6"
-            >
-              <IndustryDetailsInlineCard industry={displayed} empty={!displayed} />
+            <div className="min-h-56 rounded-2xl border border-[#d4a84a]/25 bg-gradient-to-br from-[#0c1d44]/80 to-[#061230]/80 p-5 backdrop-blur-sm lg:p-6">
+              <div
+                key={displayed?.slug ?? "idle"}
+                className="animate-[fade-in_150ms_ease-out]"
+              >
+                <IndustryDetailsInlineCard industry={displayed} empty={!displayed} />
+              </div>
             </div>
           </div>
           )}
         </div>
 
         {/* orbital industries */}
-        <div className="relative mx-auto aspect-square w-full max-w-[min(100%,480px)] shrink-0 rounded-3xl border border-[#d4a84a]/20 bg-[#091a3d]/60 backdrop-blur-sm sm:max-w-[520px] md:mx-0 md:max-w-none md:aspect-auto md:h-[560px] lg:justify-self-end">
+        <div
+          ref={orbitAreaRef}
+          className="relative mx-auto aspect-square w-full max-w-[min(100%,480px)] shrink-0 rounded-3xl border border-[#d4a84a]/20 bg-[#091a3d]/60 backdrop-blur-sm sm:max-w-[520px] md:mx-0 md:max-w-none md:aspect-auto md:h-[560px] lg:justify-self-end"
+          onMouseLeave={() => !isTouch && setHoveredIndustry(null)}
+        >
           <ParticleCanvas activeId={hoveredId} />
 
           {/* concentric rings */}
@@ -442,18 +477,18 @@ export default function IndustriesHero() {
                 <button
                   key={ind.slug}
                   type="button"
-                  onMouseEnter={() => !isTouch && setHoveredId(ind.slug)}
-                  onMouseLeave={() => !isTouch && setHoveredId(null)}
-                  onFocus={() => setHoveredId(ind.slug)}
-                  onBlur={() => !isTouch && setHoveredId(null)}
+                  onMouseEnter={() => !isTouch && setHoveredIndustry(ind.slug)}
+                  onMouseLeave={handleIndustryPointerLeave}
+                  onFocus={() => setHoveredIndustry(ind.slug)}
+                  onBlur={() => !isTouch && setHoveredIndustry(null)}
                   onClick={() => selectIndustry(ind.slug)}
                   style={{ left: `${x}%`, top: `${y}%` }}
-                  className="group absolute -translate-x-1/2 -translate-y-1/2 touch-manipulation"
+                  className="group absolute -translate-x-1/2 -translate-y-1/2 touch-manipulation p-3"
                   aria-pressed={isSelected}
                 >
                   <div
-                    className={`flex flex-col items-center gap-1.5 transition-all duration-300 sm:gap-2 ${
-                      isDisplayed ? "scale-110" : "scale-100"
+                    className={`flex flex-col items-center gap-1.5 transition-[filter,opacity] duration-300 sm:gap-2 ${
+                      isDisplayed ? "brightness-110" : "brightness-100"
                     }`}
                   >
                     <div
@@ -487,10 +522,7 @@ export default function IndustriesHero() {
 
         {/* mobile: inline card only */}
         {INDUSTRY_DETAILS_MODE === "inline" && selected && (
-          <div
-            key={selected.slug}
-            className="animate-[fade-in_400ms_ease-out] rounded-2xl border border-[#d4a84a]/25 bg-gradient-to-br from-[#0c1d44]/80 to-[#061230]/80 p-5 backdrop-blur-sm md:hidden"
-          >
+          <div className="rounded-2xl border border-[#d4a84a]/25 bg-gradient-to-br from-[#0c1d44]/80 to-[#061230]/80 p-5 backdrop-blur-sm md:hidden">
             <IndustryDetailsInlineCard industry={selected} />
           </div>
         )}

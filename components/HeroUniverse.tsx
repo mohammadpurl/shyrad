@@ -116,8 +116,8 @@ const BADGE_STYLES: Record<MaterialItem["badge"], string> = {
 function getNodePosition(angleDeg: number) {
   const rad = (angleDeg * Math.PI) / 180;
   return {
-    left: ORBIT_CENTER + ORBIT_RADIUS * Math.cos(rad) - 40,
-    top: ORBIT_CENTER + ORBIT_RADIUS * Math.sin(rad) - 40,
+    left: ORBIT_CENTER + ORBIT_RADIUS * Math.cos(rad) - 48,
+    top: ORBIT_CENTER + ORBIT_RADIUS * Math.sin(rad) - 52,
   };
 }
 
@@ -142,13 +142,15 @@ function HexNode({
 
   const onEnter = () => {
     if (innerRef.current) {
-      gsap.to(innerRef.current, { scale: 1.1, duration: 0.3, ease: "back.out(1.4)" });
+      gsap.killTweensOf(innerRef.current);
+      gsap.to(innerRef.current, { scale: 1.08, duration: 0.25, ease: "power2.out" });
     }
   };
 
   const onLeave = () => {
     if (innerRef.current) {
-      gsap.to(innerRef.current, { scale: 1, duration: 0.3, ease: "power2.out" });
+      gsap.killTweensOf(innerRef.current);
+      gsap.to(innerRef.current, { scale: 1, duration: 0.25, ease: "power2.out" });
     }
   };
 
@@ -164,8 +166,8 @@ function HexNode({
           : {
               left: pos.left,
               top: pos.top,
-              width: 80,
-              height: 80,
+              width: 96,
+              height: 104,
             }
       }
       onClick={() => onOpen(industry)}
@@ -237,6 +239,8 @@ export default function HeroUniverse() {
   const nodeRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const particleFrameRef = useRef(0);
   const gsapCtxRef = useRef<gsap.Context | null>(null);
+  const rotationTweensRef = useRef<gsap.core.Tween[]>([]);
+  const orbitHoveredRef = useRef(false);
 
   const [isMobile, setIsMobile] = useState(false);
   const [activeIndustry, setActiveIndustry] = useState<IndustryItem | null>(null);
@@ -335,32 +339,42 @@ export default function HeroUniverse() {
     if (!scene) return;
 
     gsapCtxRef.current?.revert();
+    gsapCtxRef.current = null;
+    rotationTweensRef.current = [];
+
     gsapCtxRef.current = gsap.context(() => {
       const orbit = orbitRef.current;
       const ring1 = ring1Ref.current;
       const ring2 = ring2Ref.current;
       const ring3 = ring3Ref.current;
+      const tweens: gsap.core.Tween[] = [];
 
       if (orbit) {
-        gsap.to(orbit, {
-          rotation: 360,
-          duration: 40,
-          repeat: -1,
-          ease: "none",
-          transformOrigin: "center center",
-        });
+        tweens.push(
+          gsap.to(orbit, {
+            rotation: 360,
+            duration: 40,
+            repeat: -1,
+            ease: "none",
+            transformOrigin: "center center",
+          })
+        );
       }
 
       nodeRefs.current.forEach((node) => {
         if (!node) return;
-        gsap.to(node, {
-          rotation: -360,
-          duration: 40,
-          repeat: -1,
-          ease: "none",
-          transformOrigin: "40px 40px",
-        });
+        tweens.push(
+          gsap.to(node, {
+            rotation: -360,
+            duration: 40,
+            repeat: -1,
+            ease: "none",
+            transformOrigin: "48px 44px",
+          })
+        );
       });
+
+      rotationTweensRef.current = tweens;
 
       if (ring1) {
         gsap.to(ring1, {
@@ -402,6 +416,34 @@ export default function HeroUniverse() {
     return () => {
       gsapCtxRef.current?.revert();
       gsapCtxRef.current = null;
+      rotationTweensRef.current = [];
+    };
+  }, [isMobile]);
+
+  useEffect(() => {
+    if (isMobile) return;
+
+    const orbit = orbitRef.current;
+    if (!orbit) return;
+
+    const pauseRotations = () => {
+      orbitHoveredRef.current = true;
+      rotationTweensRef.current.forEach((tween) => tween.pause());
+      gsap.to(orbit, { x: 0, y: 0, duration: 0.4, ease: "power2.out" });
+    };
+
+    const resumeRotations = () => {
+      orbitHoveredRef.current = false;
+      rotationTweensRef.current.forEach((tween) => tween.resume());
+    };
+
+    orbit.addEventListener("mouseenter", pauseRotations);
+    orbit.addEventListener("mouseleave", resumeRotations);
+
+    return () => {
+      orbit.removeEventListener("mouseenter", pauseRotations);
+      orbit.removeEventListener("mouseleave", resumeRotations);
+      orbitHoveredRef.current = false;
     };
   }, [isMobile]);
 
@@ -439,10 +481,10 @@ export default function HeroUniverse() {
         ease: "power2.out",
       });
 
-      if (orbit) {
+      if (orbit && !orbitHoveredRef.current) {
         gsap.to(orbit, {
-          x: nx * 18,
-          y: ny * 12,
+          x: nx * 12,
+          y: ny * 8,
           duration: 0.8,
           ease: "power2.out",
         });
