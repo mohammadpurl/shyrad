@@ -86,10 +86,10 @@ function IndustryDetailsInlineCard({
 
 function ParticleCanvas({
   activeId,
-  disablePointerAttract = false,
+  touchPulse,
 }: {
   activeId: string | null;
-  disablePointerAttract?: boolean;
+  touchPulse?: { x: number; y: number; id: number } | null;
 }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const stateRef = useRef({
@@ -98,17 +98,9 @@ function ParticleCanvas({
     t: 0,
     activeId: activeId as string | null,
     pointerInside: false,
+    touchAttract: false,
     restoreBlend: 0,
-    disablePointerAttract,
   });
-
-  useEffect(() => {
-    stateRef.current.disablePointerAttract = disablePointerAttract;
-    if (disablePointerAttract) {
-      stateRef.current.pointerInside = false;
-      stateRef.current.restoreBlend = 1;
-    }
-  }, [disablePointerAttract]);
 
   useEffect(() => {
     const prev = stateRef.current.activeId;
@@ -118,6 +110,22 @@ function ParticleCanvas({
       stateRef.current.pointerInside = false;
     }
   }, [activeId]);
+
+  useEffect(() => {
+    if (!touchPulse) return;
+
+    stateRef.current.mx = touchPulse.x;
+    stateRef.current.my = touchPulse.y;
+    stateRef.current.touchAttract = true;
+    stateRef.current.restoreBlend = 0;
+
+    const timer = window.setTimeout(() => {
+      stateRef.current.touchAttract = false;
+      stateRef.current.restoreBlend = 1;
+    }, 750);
+
+    return () => clearTimeout(timer);
+  }, [touchPulse?.id, touchPulse?.x, touchPulse?.y]);
 
   useEffect(() => {
     const canvas = ref.current;
@@ -223,9 +231,6 @@ function ParticleCanvas({
       host.addEventListener("mouseleave", onLeave);
     }
 
-    host.addEventListener("touchend", onLeave, { passive: true });
-    host.addEventListener("touchcancel", onLeave, { passive: true });
-
     const render = () => {
       if (w > 0 && h > 0) {
         stateRef.current.t += 0.005;
@@ -244,13 +249,12 @@ function ParticleCanvas({
           my,
           activeId: currentActiveId,
           pointerInside,
-          disablePointerAttract: pointerDisabled,
+          touchAttract,
         } = stateRef.current;
         const attract =
-          !pointerDisabled && Boolean(currentActiveId) && pointerInside;
-        const springStrength = pointerDisabled
-          ? 0.008
-          : 0.0015 + stateRef.current.restoreBlend * 0.006;
+          touchAttract || (Boolean(currentActiveId) && pointerInside);
+        const springStrength =
+          0.0015 + stateRef.current.restoreBlend * 0.006;
 
         if (stateRef.current.restoreBlend > 0) {
           stateRef.current.restoreBlend = Math.max(
@@ -265,7 +269,7 @@ function ParticleCanvas({
             const dy = my - p.y;
             const d2 = dx * dx + dy * dy;
             if (d2 < 18000) {
-              const f = (1 - d2 / 18000) * 0.035;
+              const f = (1 - d2 / 18000) * (touchAttract ? 0.045 : 0.035);
               p.vx += dx * f * 0.01;
               p.vy += dy * f * 0.01;
             }
@@ -320,15 +324,10 @@ function ParticleCanvas({
       cancelAnimationFrame(raf);
       resizeObserver.disconnect();
       window.removeEventListener("resize", resize);
-      const coarsePointer = window.matchMedia(
-        "(hover: none), (pointer: coarse)"
-      ).matches;
       if (!coarsePointer) {
         host.removeEventListener("mousemove", onMove);
         host.removeEventListener("mouseleave", onLeave);
       }
-      host.removeEventListener("touchend", onLeave);
-      host.removeEventListener("touchcancel", onLeave);
     };
   }, []);
 
@@ -344,6 +343,12 @@ export default function IndustriesHero() {
   });
   const orbitAreaRef = useRef<HTMLDivElement>(null);
   const hoverClearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const touchPulseIdRef = useRef(0);
+  const [touchPulse, setTouchPulse] = useState<{
+    x: number;
+    y: number;
+    id: number;
+  } | null>(null);
 
   const displayedId =
     INDUSTRY_DETAILS_MODE === "inline" ? hoveredId ?? selectedId : hoveredId;
@@ -387,8 +392,25 @@ export default function IndustriesHero() {
     setHoveredIndustry(null);
   };
 
-  const selectIndustry = (slug: string) => {
+  const pulseTouchAtIndustry = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!isTouch || !orbitAreaRef.current) return;
+
+    const hostRect = orbitAreaRef.current.getBoundingClientRect();
+    const btnRect = e.currentTarget.getBoundingClientRect();
+    touchPulseIdRef.current += 1;
+    setTouchPulse({
+      id: touchPulseIdRef.current,
+      x: btnRect.left + btnRect.width / 2 - hostRect.left,
+      y: btnRect.top + btnRect.height / 2 - hostRect.top,
+    });
+  };
+
+  const selectIndustry = (
+    slug: string,
+    e?: React.MouseEvent<HTMLButtonElement>
+  ) => {
     setSelectedId((prev) => (prev === slug ? null : slug));
+    if (e) pulseTouchAtIndustry(e);
   };
 
   return (
@@ -479,10 +501,7 @@ export default function IndustriesHero() {
           className="relative mx-auto aspect-square w-full max-w-[min(100%,480px)] shrink-0 rounded-3xl border border-[#d4a84a]/20 bg-[#091a3d]/60 backdrop-blur-sm sm:max-w-[520px] md:mx-0 md:max-w-none md:aspect-auto md:h-[560px] lg:justify-self-end"
           onMouseLeave={() => !isTouch && setHoveredIndustry(null)}
         >
-          <ParticleCanvas
-            activeId={isTouch ? null : hoveredId}
-            disablePointerAttract={isTouch}
-          />
+          <ParticleCanvas activeId={hoveredId} touchPulse={touchPulse} />
 
           {/* concentric rings */}
           <div className="pointer-events-none absolute inset-0 grid place-items-center">
@@ -525,7 +544,7 @@ export default function IndustriesHero() {
                   onMouseLeave={handleIndustryPointerLeave}
                   onFocus={() => !isTouch && setHoveredIndustry(ind.slug)}
                   onBlur={() => !isTouch && setHoveredIndustry(null)}
-                  onClick={() => selectIndustry(ind.slug)}
+                  onClick={(e) => selectIndustry(ind.slug, e)}
                   style={{ left: `${x}%`, top: `${y}%` }}
                   className="group absolute -translate-x-1/2 -translate-y-1/2 touch-manipulation p-3"
                   aria-pressed={isSelected}
