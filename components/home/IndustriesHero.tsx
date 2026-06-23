@@ -84,7 +84,13 @@ function IndustryDetailsInlineCard({
   );
 }
 
-function ParticleCanvas({ activeId }: { activeId: string | null }) {
+function ParticleCanvas({
+  activeId,
+  disablePointerAttract = false,
+}: {
+  activeId: string | null;
+  disablePointerAttract?: boolean;
+}) {
   const ref = useRef<HTMLCanvasElement>(null);
   const stateRef = useRef({
     mx: 0,
@@ -93,13 +99,23 @@ function ParticleCanvas({ activeId }: { activeId: string | null }) {
     activeId: activeId as string | null,
     pointerInside: false,
     restoreBlend: 0,
+    disablePointerAttract,
   });
+
+  useEffect(() => {
+    stateRef.current.disablePointerAttract = disablePointerAttract;
+    if (disablePointerAttract) {
+      stateRef.current.pointerInside = false;
+      stateRef.current.restoreBlend = 1;
+    }
+  }, [disablePointerAttract]);
 
   useEffect(() => {
     const prev = stateRef.current.activeId;
     stateRef.current.activeId = activeId;
     if (prev && !activeId) {
       stateRef.current.restoreBlend = 1;
+      stateRef.current.pointerInside = false;
     }
   }, [activeId]);
 
@@ -198,8 +214,17 @@ function ParticleCanvas({ activeId }: { activeId: string | null }) {
       }
     };
 
-    host.addEventListener("mousemove", onMove);
-    host.addEventListener("mouseleave", onLeave);
+    const coarsePointer = window.matchMedia(
+      "(hover: none), (pointer: coarse)"
+    ).matches;
+
+    if (!coarsePointer) {
+      host.addEventListener("mousemove", onMove);
+      host.addEventListener("mouseleave", onLeave);
+    }
+
+    host.addEventListener("touchend", onLeave, { passive: true });
+    host.addEventListener("touchcancel", onLeave, { passive: true });
 
     const render = () => {
       if (w > 0 && h > 0) {
@@ -214,12 +239,18 @@ function ParticleCanvas({ activeId }: { activeId: string | null }) {
         ctx.fillStyle = g;
         ctx.fillRect(0, 0, w, h);
 
-        const { mx, my, activeId: currentActiveId, pointerInside } =
-          stateRef.current;
+        const {
+          mx,
+          my,
+          activeId: currentActiveId,
+          pointerInside,
+          disablePointerAttract: pointerDisabled,
+        } = stateRef.current;
         const attract =
-          Boolean(currentActiveId) && pointerInside;
-        const springStrength =
-          0.0015 + stateRef.current.restoreBlend * 0.006;
+          !pointerDisabled && Boolean(currentActiveId) && pointerInside;
+        const springStrength = pointerDisabled
+          ? 0.008
+          : 0.0015 + stateRef.current.restoreBlend * 0.006;
 
         if (stateRef.current.restoreBlend > 0) {
           stateRef.current.restoreBlend = Math.max(
@@ -289,8 +320,15 @@ function ParticleCanvas({ activeId }: { activeId: string | null }) {
       cancelAnimationFrame(raf);
       resizeObserver.disconnect();
       window.removeEventListener("resize", resize);
-      host.removeEventListener("mousemove", onMove);
-      host.removeEventListener("mouseleave", onLeave);
+      const coarsePointer = window.matchMedia(
+        "(hover: none), (pointer: coarse)"
+      ).matches;
+      if (!coarsePointer) {
+        host.removeEventListener("mousemove", onMove);
+        host.removeEventListener("mouseleave", onLeave);
+      }
+      host.removeEventListener("touchend", onLeave);
+      host.removeEventListener("touchcancel", onLeave);
     };
   }, []);
 
@@ -300,7 +338,10 @@ function ParticleCanvas({ activeId }: { activeId: string | null }) {
 export default function IndustriesHero() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
-  const [isTouch, setIsTouch] = useState(false);
+  const [isTouch, setIsTouch] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(hover: none), (pointer: coarse)").matches;
+  });
   const orbitAreaRef = useRef<HTMLDivElement>(null);
   const hoverClearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -438,7 +479,10 @@ export default function IndustriesHero() {
           className="relative mx-auto aspect-square w-full max-w-[min(100%,480px)] shrink-0 rounded-3xl border border-[#d4a84a]/20 bg-[#091a3d]/60 backdrop-blur-sm sm:max-w-[520px] md:mx-0 md:max-w-none md:aspect-auto md:h-[560px] lg:justify-self-end"
           onMouseLeave={() => !isTouch && setHoveredIndustry(null)}
         >
-          <ParticleCanvas activeId={hoveredId} />
+          <ParticleCanvas
+            activeId={isTouch ? null : hoveredId}
+            disablePointerAttract={isTouch}
+          />
 
           {/* concentric rings */}
           <div className="pointer-events-none absolute inset-0 grid place-items-center">
@@ -479,7 +523,7 @@ export default function IndustriesHero() {
                   type="button"
                   onMouseEnter={() => !isTouch && setHoveredIndustry(ind.slug)}
                   onMouseLeave={handleIndustryPointerLeave}
-                  onFocus={() => setHoveredIndustry(ind.slug)}
+                  onFocus={() => !isTouch && setHoveredIndustry(ind.slug)}
                   onBlur={() => !isTouch && setHoveredIndustry(null)}
                   onClick={() => selectIndustry(ind.slug)}
                   style={{ left: `${x}%`, top: `${y}%` }}
